@@ -147,15 +147,40 @@ classdef LEDArduino < handle
             s.sendCommand('g');
             count=fread(s.serialObj,1,'uint8');
         end
+        
+        function sendLEDs(s,A,patterns)
+            [numRows,numCols]=size(A);
+            assert (numRows>0 && numCols>0);
+            assert(~isempty(patterns));
+            s.writeToSerial(['n' numRows numCols length(patterns)]);
+            
+            % send LEDs
+            for i=1:numRows
+                s.writeToSerial(['L' A(i,:)]);
+            end
+            % send patterns
+            patternInd=[];
+            for iter=1:numel(patterns)
+                if(~s.mapPattern.isKey(patterns{iter}))
+                    error('Pattern %s is not a valid pattern',patterns{iter});
+                end
+                patternInd(end+1)=s.mapPattern(patterns{iter});                 
+            end
+            s.writeToSerial(['P' length(patternInd) patternInd]);
+        end
 
         function status=getInfo(s)
             s.sendCommand('v');
             status.counter=fread(s.serialObj,1,'uint8');
             status.enableFlag=fread(s.serialObj,1,'uint8');
             status.power=fread(s.serialObj,1,'uint8');
-            numLEDs = fread(s.serialObj,1,'uint8');
+            numRows=fread(s.serialObj,1,'uint8');
+            numCols=fread(s.serialObj,1,'uint8');
+            status.LEDs=zeros(numRows,numCols);
+            for i=1:numRows
+                status.LEDs(i,:)=fread(s.serialObj,numCols,'uint8');
+            end
             numPatterns=fread(s.serialObj,1,'uint8');
-            status.LEDs=fread(s.serialObj, numLEDs, 'uint8');
             status.patterns=fread(s.serialObj, numPatterns, 'uint8');
         end
 

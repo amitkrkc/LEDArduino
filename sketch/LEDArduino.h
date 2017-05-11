@@ -21,9 +21,10 @@ class LEDArduino
         static byte leftLEDs[117], rightLEDs[117], topLEDs[123], bottomLEDs[115], ringLEDs[48], centralLEDs[39];
         static byte* ledPatterns[6];
         static byte patternLength[6];
+        
 
-        // stores total number of LEDs 
-        byte totalNumberOfLEDs;
+        // stores total number of LEDs
+        byte numRows, numCols;
 
         // stores total number of patterns
         byte totalNumberOfPatterns;
@@ -32,7 +33,7 @@ class LEDArduino
         uint32_t color;
 
         // stores the LED indices
-        byte* leds;
+        byte** leds;
 
         // stores pattern indices
         byte* patterns;
@@ -48,9 +49,12 @@ class LEDArduino
 
         // -------------private functions----------------------
 
-       
+
         // turns all LEDs in the arr array
         void turnArray(byte* arr, int len);
+
+        //helper function
+        void deleteLEDs();
 
     public:
         // constructor
@@ -70,14 +74,14 @@ class LEDArduino
 
         //sets the power level of the LEDs
         void setPower(byte power);
-        
+
         // advances LED sequence
         void advance();
 
         // reads command from serial port and executes
         void executeSerialCommand();
 
-        // Prints information about the LEDArduino 
+        // Prints information about the LEDArduino
         void getInfo();
 
         // returns power

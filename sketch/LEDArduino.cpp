@@ -1,6 +1,13 @@
 #include "LEDArduino.h"
 #include "Adafruit_DotStar.h"
 
+void LEDArduino:: deleteLEDs()
+{
+  for(byte i=0;i<numRows;++i)
+    delete[] leds[i];
+  delete[] leds;
+}
+
 // interrupt service for advancing the hardware counter
 void LEDArduino::isrAdvance()
 {
@@ -13,20 +20,27 @@ void LEDArduino::turnArray(byte* arr, int len)
 {
     strip.clear();
     for(int i=0;i<len;++i)
+    {
+        if(arr[i]==254)// ignore the 254-the LED
+          continue;
         strip.setPixelColor(arr[i],color);
+    }
     strip.show();
 }
 
-// Prints information about the LEDArduino 
+// Prints information about the LEDArduino
 void LEDArduino::getInfo()
 {
     Serial.write(counter);
     Serial.write(enableCounterIncrement);
     Serial.write(color & 255);
-    Serial.write(totalNumberOfLEDs);
+    Serial.write(numRows);
+    Serial.write(numCols);
+    for(byte i=0;i<numRows;++i)
+      Serial.write(leds[i],numCols);
     Serial.write(totalNumberOfPatterns);
-    Serial.write(leds,totalNumberOfLEDs);
     Serial.write(patterns, totalNumberOfPatterns);
+    
 }
 
 byte LEDArduino::getPower()
@@ -66,8 +80,9 @@ void LEDArduino::reset()
     strip.show();
     enableCounterIncrement=0;
     counter=0;
+    
     if(leds)
-        delete[] leds;
+        deleteLEDs();
     if(patterns)
         delete[] patterns;
 }
@@ -80,17 +95,15 @@ void LEDArduino::setPower(byte power)
 
 void LEDArduino::advance()
 {
-    if(counter<totalNumberOfLEDs)
+    if(counter<numRows)
     {
-        strip.clear();
-        strip.setPixelColor(leds[counter],color);
-        strip.show();
+        turnArray(leds[counter],numCols);
     }
     else
     {
-        turnArray(ledPatterns[counter-totalNumberOfLEDs],patternLength[counter-totalNumberOfLEDs]);
+        turnArray(ledPatterns[counter-numRows],patternLength[counter-numRows]);
     }
-    counter=(counter+1)%(totalNumberOfLEDs+totalNumberOfPatterns);
+    counter=(counter+1)%(numRows+totalNumberOfPatterns);
 }
 
 void LEDArduino::executeSerialCommand()
@@ -102,7 +115,7 @@ void LEDArduino::executeSerialCommand()
         char cmd=Serial.read();
         switch(cmd)
         {
-            //blink 
+            //blink
             case 'b':
               byte num_delay, delay_val;
               Serial.readBytes(&num_delay,1);
@@ -112,20 +125,20 @@ void LEDArduino::executeSerialCommand()
                 digitalWrite(LED_BUILTIN, HIGH);
                 delay(delay_val);
                 digitalWrite(LED_BUILTIN, LOW);
-                delay(delay_val);                
+                delay(delay_val);
               }
               break;
-              
+
             // advance
             case 'a':
                 advance();
                 break;
-            
+
             // reset
             case 'r':
                 reset();
                 break;
-            
+
             // zero out the LEDs
             case 'z':
                 strip.clear();
@@ -143,7 +156,7 @@ void LEDArduino::executeSerialCommand()
                     strip.show();
                 }
                 break;
-            
+
             // LED array
             case 'l':
                 byte num_leds;
@@ -154,8 +167,8 @@ void LEDArduino::executeSerialCommand()
                 turnArray(arr, int(num_leds));
                 delete[] arr;
                 break;
-            
-            // turn leds from start to end 
+
+            // turn leds from start to end
             case 'c':
                 byte start_led,end_led;
                 Serial.readBytes(&start_led,1);
@@ -194,7 +207,7 @@ void LEDArduino::executeSerialCommand()
                 Serial.readBytes(&pwr,1);
                 setPower(pwr);
                 break;
-            
+
             //get info
             case 'v':
                 getInfo();
@@ -210,49 +223,45 @@ void LEDArduino::executeSerialCommand()
 
             // load number of LEDs and patterns
             case 'n':
-                Serial.readBytes(&totalNumberOfLEDs,1);
+                Serial.readBytes(&numRows,1);
+                Serial.readBytes(&numCols,1);
                 Serial.readBytes(&totalNumberOfPatterns,1);
-                if(patterns && totalNumberOfPatterns>0)
-                    delete[] patterns;
-                if(leds && totalNumberOfLEDs>0)
-                    delete[] leds;
                 
+                if(numRows>0 && numCols>0)
+                {
+                  if(leds)
+                    deleteLEDs();
+                
+                  leds=new byte*[numRows];
+                  for(byte i=0;i<numRows;++i)
+                    leds[i]=new byte[numCols];
+                }
                 if(totalNumberOfPatterns>0)
-                    patterns=new byte[totalNumberOfPatterns];
-                
-                if(totalNumberOfLEDs>0)
-                    leds=new byte[totalNumberOfLEDs];
+                {
+                  if(patterns)
+                    delete[] patterns;
+                  patterns=new byte[totalNumberOfPatterns];
+                } 
 
                 countLEDs=0;
+                countPatterns=0;
                 break;
 
             case 'L':
-                if(totalNumberOfLEDs>0)
+                if(numRows>0 && numCols>0)
                 {
-                    byte temp_num;
-                    Serial.readBytes(&temp_num,1);
-                    byte i=0;
-                    while(i<temp_num && countLEDs<totalNumberOfLEDs)
+                    if(countLEDs<numRows)
                     {
-                        Serial.readBytes(&leds[countLEDs],1);
-                        ++i;
-                        ++countLEDs;
+                        Serial.readBytes(leds[countLEDs++],numCols);
                     }
                 }
                 counter=0;
                 break;
-            
+
             case 'P':
                 if(totalNumberOfPatterns>0)
                 {
-                    byte temp_num;
-                    Serial.readBytes(&temp_num,1);
-                    byte i=0;
-                    while(i<temp_num)
-                    {
-                        Serial.readBytes(&patterns[i],1);
-                        ++i;
-                    }
+                    Serial.readBytes(patterns,totalNumberOfPatterns);
                 }
                 counter=0;
                 break;
@@ -291,3 +300,5 @@ byte LEDArduino::ringLEDs[48] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,
 
 byte LEDArduino::patternLength[6]={117,117,123,115,39,48};
 byte* LEDArduino::ledPatterns[6]={leftLEDs,rightLEDs,topLEDs,bottomLEDs,centralLEDs,ringLEDs};
+
+
