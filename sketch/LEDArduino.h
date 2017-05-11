@@ -1,7 +1,7 @@
 #ifndef LEDARDUINO_H
 #define LEDARDUINO_H
 
-#include <Adafruit_DotStar.h>
+#include "Adafruit_DotStar.h"
 #include <SPI.h>
 
 #define NUM_PIXELS 256
@@ -18,7 +18,7 @@ class LEDArduino
         // static variables
 
         // stores LEDs for various patterns
-        static byte leftLEDs[117], rightLEDs[117], topLEDs[123], bottomLEDs[116], ringLEDs[48], centralLEDs[39];
+        static byte leftLEDs[117], rightLEDs[117], topLEDs[123], bottomLEDs[115], ringLEDs[48], centralLEDs[39];
         static byte* ledPatterns[6];
         static byte patternLength[6];
 
@@ -55,6 +55,9 @@ class LEDArduino
     public:
         // constructor
         LEDArduino();
+
+        //copy constructor
+        LEDArduino(const LEDArduino& obj);
 
         // destructor
         ~LEDArduino();

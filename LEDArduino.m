@@ -3,6 +3,7 @@ classdef LEDArduino < handle
         serialObj;
         validCommands;
         mapPattern;
+        validPatterns;
     end
     
     methods(Access=private)
@@ -18,10 +19,7 @@ classdef LEDArduino < handle
             fwrite(s.serialObj,cmd,'uint8');
         end
 
-        % assertion
-        function assertion(val)
-            assert(val>=0 && val<=255,sprintf('Value %d must be in the range [0,255]'));
-        end
+        
     end
 
     methods
@@ -30,10 +28,10 @@ classdef LEDArduino < handle
                 comPort='COM6';
             end
 
-            validPatterns={'left','right','top','bottom','central','ring'};
-            s.mapPattern=containers.Map(validPatterns,0:numel(validPatterns)-1);
+            s.validPatterns={'left','right','top','bottom','central','ring'};
+            s.mapPattern=containers.Map(s.validPatterns,0:numel(s.validPatterns)-1);
 
-            s.validCommands='arGgv';
+            s.validCommands='arGgvz';
 
             s.serialObj = serial(comPort,'BaudRate',115200);
             try
@@ -51,17 +49,21 @@ classdef LEDArduino < handle
             fclose(s.serialObj);
         end
 
+        function blink(s,num,d)
+            s.writeToSerial(['b' num d]);
+        end
+        
         function advance(s)
             s.sendCommand('a');
         end
         
         function setPower(s,pwr)
-            assertion(pwr);
+            assert(pwr>=0 && pwr<=255);
             s.writeToSerial(['w' pwr]);
         end
 
         function turnLED(s, led)
-            assertion(led);
+            assert(led>=0 && led<=255);
             s.writeToSerial(['i' led]);
         end
         
@@ -80,20 +82,22 @@ classdef LEDArduino < handle
         end
 
         function turnLEDRange(s,startLED, endLED)
-            assertion(startLED);
-            assertion(endLED);
-            s.writeToSerial([c startLED endLED]);
+            assert(startLED>=0 && startLED<=255);
+            assert(endLED>=0 && endLED<=255);
+            assert(endLED>=startLED);
+            s.writeToSerial(['c' startLED endLED]);
         end
 
         function turnLEDPattern(s, pattern)
+            
             if ischar(pattern)
                 assert(s.mapPattern.isKey(pattern),sprintf('Pattern %s is not a valid pattern', pattern));
                 patternInd=s.mapPattern(pattern);
             else
-                assert(pattern>=0 && pattern<=numel(s.validPatterns)-1);
+                assert(pattern>=0 && pattern<=numel(s.validPatterns)-1,sprintf('Pattern index must be in the range [0,%d]',numel(s.validPatterns)-1));
                 patternInd=pattern;
             end
-            s.writeToSerial(['P' patternInd]);
+            s.writeToSerial(['p' patternInd]);
         end
         
         function enableCounter(s)
@@ -116,7 +120,7 @@ classdef LEDArduino < handle
                 batchSize=20;
                 numBatches=ceil(length(LEDs)/batchSize);
                 for i=1:numBatches
-                    ind=(i-1)*batchsize+1:min(length(LEDs),i*batchSize);
+                    ind=(i-1)*batchSize+1:min(length(LEDs),i*batchSize);
                     s.writeToSerial(['L' length(ind) LEDs(ind)]);
                 end
             else
@@ -156,24 +160,18 @@ classdef LEDArduino < handle
         end
 
         function parseChannel(s, chnl)
-            oldPower=s.getPower();
             if(strcmp(chnl(1:3),'LED'))
                 LED=uint8(str2double(chnl(4:end)));
-                s.setPower(250);
                 s.turnLED(LED);
             elseif length(chnl)>8 && strcmp(chnl(1:7),'CUSTOM_')
                 str=chnl(8:end);
                 startLED=uint8(str2double(str(1:3)));
                 endLED = uint8(str2double(str(5:end)));
-                s.setPower(100);
                 s.turnLEDRange(startLED,endLED);
-            elseif length(chnl)>7 && strcmp(chnl(1:7),'ARRAY_')
+            elseif length(chnl)>7 && strcmp(chnl(1:6),'ARRAY_')
                 str = chnl(7:end);
-                s.setPower(10);
                 s.turnLEDPattern(str);
             end
-			% set the old power value
-			s.setPower(oldPower);
         end
     end
 end
