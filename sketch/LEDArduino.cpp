@@ -40,7 +40,7 @@ void LEDArduino::getInfo()
       Serial.write(leds[i],numCols);
     Serial.write(totalNumberOfPatterns);
     Serial.write(patterns, totalNumberOfPatterns);
-    
+
 }
 
 byte LEDArduino::getPower()
@@ -56,6 +56,9 @@ LEDArduino::LEDArduino():strip(NUM_PIXELS, DATA_PIN, CLOCK_PIN, DOTSTAR_BRG)
 
     enableCounterIncrement=0; // initially disabled
     counter=0; // initially set to zero
+    totalNumberOfPatterns=0;
+    numRows=0;
+    numCols=0;
 
 }
 
@@ -65,6 +68,9 @@ LEDArduino::LEDArduino(const LEDArduino& obj):strip(NUM_PIXELS, DATA_PIN, CLOCK_
   strip.show();
   enableCounterIncrement=obj.enableCounterIncrement;
   counter=obj.counter;
+  totalNumberOfPatterns=obj.totalNumberOfPatterns;
+  numRows=obj.numRows;
+  numCols=obj.numCols;
 }
 
 // destructor
@@ -80,7 +86,10 @@ void LEDArduino::reset()
     strip.show();
     enableCounterIncrement=0;
     counter=0;
-    
+    totalNumberOfPatterns=0;
+    numRows=0;
+    numCols=0;
+
     if(leds)
         deleteLEDs();
     if(patterns)
@@ -223,28 +232,35 @@ void LEDArduino::executeSerialCommand()
 
             // load number of LEDs and patterns
             case 'n':
-                Serial.readBytes(&numRows,1);
-                Serial.readBytes(&numCols,1);
-                Serial.readBytes(&totalNumberOfPatterns,1);
-                
-                if(numRows>0 && numCols>0)
+                // read code for LED or pattern
+                byte isLED;
+                Serial.readBytes(&isLED,1);
+                if(isLED==1)
                 {
-                  if(leds)
-                    deleteLEDs();
-                
-                  leds=new byte*[numRows];
-                  for(byte i=0;i<numRows;++i)
-                    leds[i]=new byte[numCols];
-                }
-                if(totalNumberOfPatterns>0)
-                {
-                  if(patterns)
-                    delete[] patterns;
-                  patterns=new byte[totalNumberOfPatterns];
-                } 
+                    Serial.readBytes(&numRows,1);
+                    Serial.readBytes(&numCols,1);
+                    if(numRows>0 && numCols>0)
+                    {
+                      if(leds)
+                        deleteLEDs();
 
-                countLEDs=0;
-                countPatterns=0;
+                      leds=new byte*[numRows];
+                      for(byte i=0;i<numRows;++i)
+                        leds[i]=new byte[numCols];
+                    }
+                    countLEDs=0;
+                }
+                else if(isLED==2) //patterns
+                {
+                    Serial.readBytes(&totalNumberOfPatterns,1);
+                    if(totalNumberOfPatterns>0)
+                    {
+                      if(patterns)
+                        delete[] patterns;
+                      patterns=new byte[totalNumberOfPatterns];
+                    }
+                    countPatterns=0;
+                }
                 break;
 
             case 'L':
