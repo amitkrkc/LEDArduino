@@ -62,6 +62,7 @@ LEDArduino::LEDArduino():strip(NUM_PIXELS, DATA_PIN, CLOCK_PIN, DOTSTAR_BRG)
 
 }
 
+// copy constructor
 LEDArduino::LEDArduino(const LEDArduino& obj):strip(NUM_PIXELS, DATA_PIN, CLOCK_PIN, DOTSTAR_BRG)
 {
   strip.begin();
@@ -102,6 +103,7 @@ void LEDArduino::setPower(byte power)
     color=((uint32_t)power << 16) | ((uint32_t)power << 8) | (uint32_t)power;
 }
 
+// advance the counter
 void LEDArduino::advance()
 {
     if(counter<numRows)

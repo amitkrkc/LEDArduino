@@ -5,7 +5,7 @@ classdef LEDArduino < handle
         mapPattern;
         validPatterns;
     end
-    
+
     methods(Access=private)
         % send command 'cmd'
         function sendCommand(s,cmd)
@@ -14,12 +14,10 @@ classdef LEDArduino < handle
             pause(0.01);
         end
 
-        %write 
+        %write
         function writeToSerial(s,cmd)
             fwrite(s.serialObj,cmd,'uint8');
         end
-
-        
     end
 
     methods
@@ -42,7 +40,7 @@ classdef LEDArduino < handle
                 error(['Could not open port: ' comPort]);
             end
         end
-        
+
         % destructor
         function delete(s)
             s.reset();
@@ -52,11 +50,11 @@ classdef LEDArduino < handle
         function blink(s,num,d)
             s.writeToSerial(['b' num d]);
         end
-        
+
         function advance(s)
             s.sendCommand('a');
         end
-        
+
         function setPower(s,pwr)
             assert(pwr>=0 && pwr<=255);
             s.writeToSerial(['w' pwr]);
@@ -66,7 +64,7 @@ classdef LEDArduino < handle
             assert(led>=0 && led<=255);
             s.writeToSerial(['i' led]);
         end
-        
+
         function reset(s)
             s.sendCommand('r');
         end
@@ -89,7 +87,6 @@ classdef LEDArduino < handle
         end
 
         function turnLEDPattern(s, pattern)
-            
             if ischar(pattern)
                 assert(s.mapPattern.isKey(pattern),sprintf('Pattern %s is not a valid pattern', pattern));
                 patternInd=s.mapPattern(pattern);
@@ -99,33 +96,22 @@ classdef LEDArduino < handle
             end
             s.writeToSerial(['p' patternInd]);
         end
-        
+
         function enableCounter(s)
             s.writeToSerial(['e' 1]);
         end
-        
+
         function disableCounter(s)
             s.writeToSerial(['e' 0]);
         end
-        
+
         function setCounter(s,c)
             s.writeToSerial(['s' c]);
         end
 
-        function sendPatterns(s, LEDs, patterns)
-            s.writeToSerial(['n' length(LEDs) length(patterns)]);
-            
-            % send LEDs
-            if(length(LEDs)>20)
-                batchSize=20;
-                numBatches=ceil(length(LEDs)/batchSize);
-                for i=1:numBatches
-                    ind=(i-1)*batchSize+1:min(length(LEDs),i*batchSize);
-                    s.writeToSerial(['L' length(ind) LEDs(ind)]);
-                end
-            else
-                s.writeToSerial(['L' length(LEDs) LEDs]);
-            end
+        function sendPatterns(s, patterns)
+            assert(~isempty(patterns));
+            s.writeToSerial(['n' 2 numel(patterns)]);
 
             % send patterns
             patternInd=[];
@@ -133,9 +119,9 @@ classdef LEDArduino < handle
                 if(~s.mapPattern.isKey(patterns{iter}))
                     error('Pattern %s is not a valid pattern',patterns{iter});
                 end
-                patternInd(end+1)=s.mapPattern(patterns{iter});                 
+                patternInd(end+1)=s.mapPattern(patterns{iter});
             end
-            s.writeToSerial(['P' length(patternInd) patternInd]);
+            s.writeToSerial(['P' patternInd]);
         end
 
         function pwr=getPower(s)
@@ -143,30 +129,23 @@ classdef LEDArduino < handle
             pwr=fread(s.serialObj,1,'uint8');
         end
 
+        % returns the current counter of the sequence
         function count=getCounter(s)
             s.sendCommand('g');
             count=fread(s.serialObj,1,'uint8');
         end
-        
-        function sendLEDs(s,A,patterns)
+
+        function sendLEDs(s,A)
+            % A : a m-by-n matrix where m is the number of LED sequences and n is the number of LEDs in each sequence.
+            % If A(i,j)=254, the corresponding LED is ignored
             [numRows,numCols]=size(A);
             assert (numRows>0 && numCols>0);
-            assert(~isempty(patterns));
-            s.writeToSerial(['n' numRows numCols length(patterns)]);
-            
+            s.writeToSerial(['n' 1 numRows numCols]); % 1 for LED, 2 for pattern
+
             % send LEDs
             for i=1:numRows
                 s.writeToSerial(['L' A(i,:)]);
             end
-            % send patterns
-            patternInd=[];
-            for iter=1:numel(patterns)
-                if(~s.mapPattern.isKey(patterns{iter}))
-                    error('Pattern %s is not a valid pattern',patterns{iter});
-                end
-                patternInd(end+1)=s.mapPattern(patterns{iter});                 
-            end
-            s.writeToSerial(['P' length(patternInd) patternInd]);
         end
 
         function status=getInfo(s)
