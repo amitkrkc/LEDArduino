@@ -1,0 +1,96 @@
+\hypertarget{class_l_e_d_arduino}{}\section{L\+E\+D\+Arduino Class Reference}
+\label{class_l_e_d_arduino}\index{L\+E\+D\+Arduino@{L\+E\+D\+Arduino}}
+
+
+{\ttfamily \#include $<$L\+E\+D\+Arduino.\+h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_l_e_d_arduino_a8f0a0b63342c171296c81f303787ccff}\label{class_l_e_d_arduino_a8f0a0b63342c171296c81f303787ccff}} 
+\hyperlink{class_l_e_d_arduino_a8f0a0b63342c171296c81f303787ccff}{L\+E\+D\+Arduino} ()
+\begin{DoxyCompactList}\small\item\em default constructor \end{DoxyCompactList}\item 
+\hyperlink{class_l_e_d_arduino_a8ba91e5ee89fe89f9c1052f5619fc436}{L\+E\+D\+Arduino} (const \hyperlink{class_l_e_d_arduino}{L\+E\+D\+Arduino} \&obj)
+\begin{DoxyCompactList}\small\item\em copy constructor \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_l_e_d_arduino_a667ca90e4554f8efd6b050489a4b84c3}\label{class_l_e_d_arduino_a667ca90e4554f8efd6b050489a4b84c3}} 
+\hyperlink{class_l_e_d_arduino_a667ca90e4554f8efd6b050489a4b84c3}{$\sim$\+L\+E\+D\+Arduino} ()
+\begin{DoxyCompactList}\small\item\em destructor \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_l_e_d_arduino_af612ff627d2ae8eedf6cdcec7ad1ac67}\label{class_l_e_d_arduino_af612ff627d2ae8eedf6cdcec7ad1ac67}} 
+void \hyperlink{class_l_e_d_arduino_af612ff627d2ae8eedf6cdcec7ad1ac67}{isr\+Advance} ()
+\begin{DoxyCompactList}\small\item\em interrupt service for advancing the hardware counter \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_l_e_d_arduino_a1b1d363f04adabc75cdc76a00fb3aa49}\label{class_l_e_d_arduino_a1b1d363f04adabc75cdc76a00fb3aa49}} 
+void \hyperlink{class_l_e_d_arduino_a1b1d363f04adabc75cdc76a00fb3aa49}{reset} ()
+\begin{DoxyCompactList}\small\item\em resets the L\+ED display and clears memory (if any) \end{DoxyCompactList}\item 
+void \hyperlink{class_l_e_d_arduino_a1972cc7d80383adc42e910ecb13ffbb2}{set\+Power} (byte power)
+\begin{DoxyCompactList}\small\item\em sets the power level of the L\+E\+Ds \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_l_e_d_arduino_a6b00a5f83bf0a8036507cf1ecc051f62}\label{class_l_e_d_arduino_a6b00a5f83bf0a8036507cf1ecc051f62}} 
+void \hyperlink{class_l_e_d_arduino_a6b00a5f83bf0a8036507cf1ecc051f62}{advance} ()
+\begin{DoxyCompactList}\small\item\em advances L\+ED sequence \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_l_e_d_arduino_ab98aa213027e69644f33bf62908a2a01}\label{class_l_e_d_arduino_ab98aa213027e69644f33bf62908a2a01}} 
+void \hyperlink{class_l_e_d_arduino_ab98aa213027e69644f33bf62908a2a01}{execute\+Serial\+Command} ()
+\begin{DoxyCompactList}\small\item\em reads command from serial port and executes \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_l_e_d_arduino_a7aa1f5ce82ced1dea2e23ee14469dbef}\label{class_l_e_d_arduino_a7aa1f5ce82ced1dea2e23ee14469dbef}} 
+void \hyperlink{class_l_e_d_arduino_a7aa1f5ce82ced1dea2e23ee14469dbef}{get\+Info} ()
+\begin{DoxyCompactList}\small\item\em Prints information about the \hyperlink{class_l_e_d_arduino}{L\+E\+D\+Arduino}. \end{DoxyCompactList}\item 
+byte \hyperlink{class_l_e_d_arduino_a11aaec881a1e6e1a1f4cff814dc252ea}{get\+Power} ()
+\begin{DoxyCompactList}\small\item\em returns brightness value or power \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\hyperlink{class_l_e_d_arduino}{L\+E\+D\+Arduino} class to interface Adafruit dotstar L\+ED disk 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_l_e_d_arduino_a8ba91e5ee89fe89f9c1052f5619fc436}\label{class_l_e_d_arduino_a8ba91e5ee89fe89f9c1052f5619fc436}} 
+\index{L\+E\+D\+Arduino@{L\+E\+D\+Arduino}!L\+E\+D\+Arduino@{L\+E\+D\+Arduino}}
+\index{L\+E\+D\+Arduino@{L\+E\+D\+Arduino}!L\+E\+D\+Arduino@{L\+E\+D\+Arduino}}
+\subsubsection{\texorpdfstring{L\+E\+D\+Arduino()}{LEDArduino()}}
+{\footnotesize\ttfamily L\+E\+D\+Arduino\+::\+L\+E\+D\+Arduino (\begin{DoxyParamCaption}\item[{const \hyperlink{class_l_e_d_arduino}{L\+E\+D\+Arduino} \&}]{obj }\end{DoxyParamCaption})}
+
+
+
+copy constructor 
+
+Copy constructor 
+\begin{DoxyParams}{Parameters}
+{\em obj} & \+: a reference to \hyperlink{class_l_e_d_arduino}{L\+E\+D\+Arduino} object (const) \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_l_e_d_arduino_a11aaec881a1e6e1a1f4cff814dc252ea}\label{class_l_e_d_arduino_a11aaec881a1e6e1a1f4cff814dc252ea}} 
+\index{L\+E\+D\+Arduino@{L\+E\+D\+Arduino}!get\+Power@{get\+Power}}
+\index{get\+Power@{get\+Power}!L\+E\+D\+Arduino@{L\+E\+D\+Arduino}}
+\subsubsection{\texorpdfstring{get\+Power()}{getPower()}}
+{\footnotesize\ttfamily byte L\+E\+D\+Arduino\+::get\+Power (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+returns brightness value or power 
+
+
+\begin{DoxyRetVals}{Return values}
+{\em power} & \+: a byte variable \\
+\hline
+\end{DoxyRetVals}
+\mbox{\Hypertarget{class_l_e_d_arduino_a1972cc7d80383adc42e910ecb13ffbb2}\label{class_l_e_d_arduino_a1972cc7d80383adc42e910ecb13ffbb2}} 
+\index{L\+E\+D\+Arduino@{L\+E\+D\+Arduino}!set\+Power@{set\+Power}}
+\index{set\+Power@{set\+Power}!L\+E\+D\+Arduino@{L\+E\+D\+Arduino}}
+\subsubsection{\texorpdfstring{set\+Power()}{setPower()}}
+{\footnotesize\ttfamily void L\+E\+D\+Arduino\+::set\+Power (\begin{DoxyParamCaption}\item[{byte}]{power }\end{DoxyParamCaption})}
+
+
+
+sets the power level of the L\+E\+Ds 
+
+
+\begin{DoxyParams}{Parameters}
+{\em power} & \+: a byte variable to specify the brightness of the L\+E\+Ds \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+L\+E\+D\+Arduino.\+h\item 
+L\+E\+D\+Arduino.\+cpp\end{DoxyCompactItemize}
